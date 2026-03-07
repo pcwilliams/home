@@ -2,7 +2,6 @@
 
 This folder contains native iOS apps built entirely through conversation with Claude Code. This file captures the shared principles, patterns, and preferences that apply across all projects.
 
-
 ## Tech Stack
 
 Every project uses the same foundation:
@@ -189,25 +188,6 @@ Capture the essence of the prompt, the approach taken, and the outcome. This doc
 - Use plain Markdown in `.md` files (no inline HTML except README badges). Images must use `![alt](src)` syntax, not `<img>` tags
 - HTML docs use a shared dark theme with CSS custom properties and Mermaid.js loaded from CDN
 - HTML docs include a hero screenshot in a phone-frame wrapper (black background, rounded corners, drop shadow) below the title/badges
-
-## Allowed Permissions
-
-Claude Code may freely perform the following without asking:
-
-- **Read any file** in `/Users/pwilliams/appledev/` and all subfolders
-- **Read anything from the web** (documentation, API references, etc.)
-- **Run read-only shell commands** in this folder and subfolders: `ls`, `head`, `tail`, `grep`, `find`, `cat`, `wc`, `file`, `diff`, `git log`, `git status`, `git diff`, etc.
-- **Build projects** using the Xcode toolchain (`xcodebuild build`, `swift build`, etc.)
-- **Run tests** using the Xcode toolchain (`xcodebuild test`)
-- **Launch and use the iPhone Simulator** for testing (`xcrun simctl` commands, simulator destinations in xcodebuild)
-
-## Working Style
-
-- **Iterative conversation:** Apps are built through progressive prompts — start with the core idea, then refine through follow-up requests
-- **Copy-based versioning:** Folder copies (e.g. `BitcoinTracker copy 8`) are used as snapshots before major changes, providing easy rollback
-- **Build-verify-iterate:** Every change is verified with a build before moving on
-- **Real-device testing:** Apps are tested on a physical iPhone 16 Pro — simulators lack GPS, geotagged photos, and other sensor data
-- **CLAUDE.md is the living knowledge base:** It captures every architectural decision, API quirk, and lesson learned so future sessions start with full context
 
 ## Common Gotchas
 

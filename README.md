@@ -115,4 +115,4 @@ Built entirely through conversation with Claude Code. No code was written manual
 
 ## Licence
 
-MIT
+Personal use
