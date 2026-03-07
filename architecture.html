@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeNet - Architecture</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-alt: #1c2333;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent-cyan: #00d2d3;
+            --accent-orange: #ff9f43;
+            --accent-blue: #54a0ff;
+            --accent-green: #00b894;
+            --accent-purple: #a29bfe;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            margin: 48px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            color: var(--accent-orange);
+            margin: 24px 0 12px;
+        }
+
+        .diagram-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px 24px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .diagram-card h3 {
+            margin-top: 0;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-cyan { background: rgba(0, 210, 211, 0.15); color: var(--accent-cyan); }
+        .badge-orange { background: rgba(255, 159, 67, 0.15); color: var(--accent-orange); }
+        .badge-blue { background: rgba(84, 160, 255, 0.15); color: var(--accent-blue); }
+        .badge-green { background: rgba(0, 184, 148, 0.15); color: var(--accent-green); }
+        .badge-purple { background: rgba(162, 155, 254, 0.15); color: var(--accent-purple); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th {
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: rgba(0, 210, 211, 0.1);
+            color: var(--accent-cyan);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a { color: var(--accent-cyan); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HomeNet Architecture</h1>
+        <p class="subtitle">Visual home network scanner for iOS</p>
+
+        <div class="tech-stack">
+            <span class="badge badge-cyan">SwiftUI</span>
+            <span class="badge badge-blue">Network.framework</span>
+            <span class="badge badge-orange">NWBrowser</span>
+            <span class="badge badge-green">NWConnection</span>
+            <span class="badge badge-purple">MVVM</span>
+        </div>
+
+        <!-- Hero screenshot -->
+        <div style="text-align: center; margin: 32px 0 16px;">
+            <div style="display: inline-block; background: #000; border-radius: 40px; padding: 14px; box-shadow: 0 16px 64px rgba(0,0,0,0.6);">
+                <img src="home-screenshot.png" alt="HomeNet running on iPhone 16 Pro" style="width: 240px; border-radius: 28px; display: block;" />
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 14px;">Running on iPhone 16 Pro</p>
+        </div>
+
+        <h2>View Hierarchy</h2>
+
+        <div class="diagram-card">
+            <h3>Navigation & Views</h3>
+            <pre class="mermaid">
+graph TD
+    A[HomeNetApp] --> B[ContentView]
+    B --> C{ViewMode Picker}
+    C -->|Map| D[NetworkMapView]
+    C -->|List| E[DeviceListView]
+    D --> F[DeviceNode]
+    E --> G[DeviceRow]
+    B -->|Sheet| H[DeviceDetailView]
+    H --> I[InfoRow]
+    H --> J[FlowLayout]
+
+    style A fill:#0f3460,stroke:#00d2d3,color:#e6edf3
+    style B fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style D fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style E fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style H fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+            </pre>
+        </div>
+
+        <h2>Data Flow</h2>
+
+        <div class="diagram-card">
+            <h3>Scan Pipeline</h3>
+            <pre class="mermaid">
+graph TD
+    VM[NetworkViewModel] -->|starts| SCAN[performScan]
+    SCAN --> NI["getifaddrs — Get IP/Subnet"]
+    NI --> PAR{Parallel}
+    PAR -->|async let| BJ[BonjourBrowser.browse]
+    PAR -->|async let| SS[NetworkScanner.scanSubnet]
+    BJ -->|8s window| BR["Bonjour Results"]
+    SS -->|Batches of 25| IPS["Found IPs"]
+    IPS --> BATCH["Identify Batches of 8"]
+    BATCH --> RH[resolveHostname]
+    BATCH --> OP[identifyOpenPorts]
+    RH --> MATCH["Match Bonjour Services"]
+    OP --> MATCH
+    BR --> MATCH
+    MATCH --> CL["DeviceClassifier.classify"]
+    CL --> DEDUP["deduplicateByIP"]
+    DEDUP --> UI["Update devices array"]
+    UI -->|Published| MAP["Map/List Views"]
+
+    style VM fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style PAR fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style CL fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style DEDUP fill:#1c2a4a,stroke:#00b894,color:#e6edf3
+    style UI fill:#0f3460,stroke:#00b894,color:#e6edf3
+    style MAP fill:#0f3460,stroke:#a29bfe,color:#e6edf3
+            </pre>
+        </div>
+
+        <div class="diagram-card">
+            <h3>Progressive Device Enrichment</h3>
+            <pre class="mermaid">
+graph LR
+    A["IP Only"] -->|resolveHostname| B["+ Hostname"]
+    B -->|identifyOpenPorts| C["+ Open Ports"]
+    C -->|matchBonjour| D["+ Services"]
+    D -->|classify| E["Categorised Device"]
+    E -->|deepProbe| F["+ Probe Names"]
+
+    style A fill:#30363d,stroke:#8b949e,color:#e6edf3
+    style B fill:#1c2a4a,stroke:#54a0ff,color:#e6edf3
+    style C fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style D fill:#1c2a4a,stroke:#a29bfe,color:#e6edf3
+    style E fill:#0f3460,stroke:#00d2d3,color:#e6edf3
+    style F fill:#0f3460,stroke:#00b894,color:#e6edf3
+            </pre>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px;">
+                Each stage triggers a UI update via <code>@Published</code>. The custom <code>Equatable</code>
+                on <code>NetworkDevice</code> compares hostname, category, services, ports, and probe results so SwiftUI
+                detects every change. Bonjour names are matched to hostnames via <code>normaliseName()</code> which strips
+                domain suffixes (<code>.lan</code>, <code>.local</code>, <code>.home.arpa</code>), DNS disambiguation numbers
+                (<code>-7</code>), Bonjour instance suffixes (<code>(920)</code>), and RAOP hex prefixes.
+                A final <code>deduplicateByIP()</code> pass merges any remaining duplicates, preferring the richer device.
+                Display names are resolved from probe-discovered friendly names (AirPlay, UPnP, Chromecast),
+                then the longest Bonjour service name, then hostname, falling back to IP address.
+            </p>
+        </div>
+
+        <h2>Service Architecture</h2>
+
+        <div class="diagram-card">
+            <h3>Concurrency Model</h3>
+            <pre class="mermaid">
+graph TD
+    VM["@MainActor NetworkViewModel"] --> NS["actor NetworkScanner"]
+    VM --> BB["@MainActor BonjourBrowser"]
+    VM --> DP["actor DeviceProber"]
+    VM --> DC["struct DeviceClassifier (static)"]
+    NS --> CP["checkPort (NWConnection)"]
+    NS --> RH["resolveHostname (getnameinfo)"]
+    NS --> NI["getNetworkInfo (getifaddrs)"]
+    BB --> NWB["NWBrowser x 24 service types"]
+    CP --> CG["ContinuationGate (NSLock)"]
+    DP --> HTTP["URLSession (HTTP/HTTPS)"]
+    DP --> BAN["NWConnection (SSH/FTP banners)"]
+    DP --> UPNP["URLSession (UPnP XML)"]
+
+    style VM fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style NS fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style BB fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style DP fill:#1c2a4a,stroke:#a29bfe,color:#e6edf3
+    style DC fill:#1c2a4a,stroke:#00b894,color:#e6edf3
+    style CG fill:#30363d,stroke:#a29bfe,color:#e6edf3
+            </pre>
+        </div>
+
+        <h2>Deep Probing Pipeline</h2>
+
+        <div class="diagram-card">
+            <h3>Background Device Probing (after scan completes)</h3>
+            <pre class="mermaid">
+graph TD
+    START[Scan Complete] -->|Background Task| PROBE[DeviceProber]
+    PROBE --> HTTP["HTTP/HTTPS<br/>Ports 80, 443, 8080, 8443"]
+    PROBE --> SSH["SSH Banner<br/>Port 22"]
+    PROBE --> BAN["Service Banners<br/>FTP 21, SMTP 25, RTSP 554"]
+    PROBE --> UPNP["UPnP Discovery<br/>description.xml, rootDesc.xml"]
+    PROBE --> AIR["AirPlay /info<br/>Port 7000"]
+    PROBE --> CAST["Chromecast eureka_info<br/>Port 8008"]
+    PROBE --> LAT["TCP Latency<br/>Wired vs WiFi inference"]
+    HTTP --> ENTRIES[ProbeEntry array]
+    SSH --> ENTRIES
+    BAN --> ENTRIES
+    UPNP --> ENTRIES
+    AIR --> ENTRIES
+    CAST --> ENTRIES
+    LAT --> ENTRIES
+    ENTRIES --> CLASS[Reclassify with probe data]
+    CLASS --> UI["Update device + UI"]
+
+    style START fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style PROBE fill:#1c2a4a,stroke:#a29bfe,color:#e6edf3
+    style HTTP fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style SSH fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style UPNP fill:#1c2a4a,stroke:#00b894,color:#e6edf3
+    style AIR fill:#1c2a4a,stroke:#a29bfe,color:#e6edf3
+    style CAST fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style LAT fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style ENTRIES fill:#30363d,stroke:#a29bfe,color:#e6edf3
+    style UI fill:#0f3460,stroke:#00b894,color:#e6edf3
+            </pre>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 12px;">
+                Probing runs as a separate <code>Task</code> after the scan declares completion. Each batch of 4
+                devices is probed in parallel. Results update the device array progressively via <code>@Published</code>,
+                so the map and detail views update in real time as probe data arrives.
+            </p>
+        </div>
+
+        <h2>Classification Priority</h2>
+
+        <div class="diagram-card">
+            <pre class="mermaid">
+graph TD
+    START[Device to classify] --> GW{Is Gateway?}
+    GW -->|Yes| ROUTER[Router]
+    GW -->|No| TXT{Has TXT model ID?}
+    TXT -->|Yes| TXTC[Classify by Apple model ID]
+    TXT -->|No| SVC{Has Bonjour Services?}
+    SVC -->|Yes| ST[Classify by service type]
+    SVC -->|No| PRB{Has Probe Results?}
+    PRB -->|Yes| PRBC[Classify by probes]
+    PRB -->|No| HN{Has Hostname?}
+    HN -->|Yes| HNC[Classify by hostname patterns]
+    HN -->|No| PT{Has Open Ports?}
+    PT -->|Yes| PTC[Classify by port fingerprint]
+    PT -->|No| UNK[Unknown]
+
+    style ROUTER fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style ST fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style HNC fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+    style PTC fill:#1c2a4a,stroke:#a29bfe,color:#e6edf3
+    style UNK fill:#30363d,stroke:#8b949e,color:#e6edf3
+            </pre>
+        </div>
+
+        <h2>Device Categories</h2>
+
+        <table>
+            <tr><th>Category</th><th>Radius</th><th>Colour</th><th>Identified By</th></tr>
+            <tr><td>Router</td><td>Centre</td><td style="color:#54a0ff">Blue</td><td>Gateway IP</td></tr>
+            <tr><td>Phone</td><td>0.70</td><td style="color:#6c5ce7">Indigo</td><td>Port 62078, hostname</td></tr>
+            <tr><td>Apple</td><td>0.75</td><td style="color:#00d2d3">Cyan</td><td>_companion-link, _device-info</td></tr>
+            <tr><td>Computer</td><td>0.80</td><td style="color:#a29bfe">Purple</td><td>SSH, Screen Sharing, hostname</td></tr>
+            <tr><td>Speaker</td><td>0.85</td><td style="color:#ff9f43">Orange</td><td>Sonos, Spotify Connect</td></tr>
+            <tr><td>Gaming</td><td>0.88</td><td style="color:#ff6b6b">Red</td><td>Hostname patterns</td></tr>
+            <tr><td>TV &amp; Media</td><td>0.90</td><td style="color:#fd79a8">Pink</td><td>Chromecast, AirPlay</td></tr>
+            <tr><td>Storage</td><td>0.92</td><td style="color:#00cec9">Teal</td><td>NAS hostname, SMB</td></tr>
+            <tr><td>Printer</td><td>0.95</td><td style="color:#00b894">Green</td><td>IPP, _printer, _scanner</td></tr>
+            <tr><td>Smart Home</td><td>0.98</td><td style="color:#ffeaa7">Yellow</td><td>HomeKit, HAP, Thread</td></tr>
+            <tr><td>Unknown</td><td>1.00</td><td style="color:#8b949e">Grey</td><td>Fallback</td></tr>
+        </table>
+
+        <h2>Map Interaction</h2>
+
+        <div class="diagram-card">
+            <pre class="mermaid">
+graph TD
+    MAP[NetworkMapView] --> ZOOM[MagnificationGesture 0.5x-4x]
+    MAP --> PAN[DragGesture]
+    MAP --> TAP[Tap DeviceNode]
+    TAP --> SHEET[DeviceDetailView Sheet]
+    MAP --> RESET[Reset Button]
+    MAP --> GRID[Canvas Grid Background]
+    MAP --> PULSE[Scan Pulse Animation]
+    MAP --> LINES[Canvas Connection Lines]
+
+    style MAP fill:#0f3460,stroke:#54a0ff,color:#e6edf3
+    style ZOOM fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style PAN fill:#1c2a4a,stroke:#00d2d3,color:#e6edf3
+    style SHEET fill:#1c2a4a,stroke:#ff9f43,color:#e6edf3
+            </pre>
+        </div>
+
+        <div class="footer">
+            <p>HomeNet &mdash; Built with Claude Code &mdash; March 2026</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#161b22',
+                primaryColor: '#0f3460',
+                primaryTextColor: '#e6edf3',
+                primaryBorderColor: '#00d2d3',
+                lineColor: '#54a0ff',
+                secondaryColor: '#0f3460',
+                tertiaryColor: '#0f3460',
+                fontFamily: '-apple-system, BlinkMacSystemFont, SF Pro Text, sans-serif'
+            },
+            flowchart: {
+                curve: 'basis',
+                padding: 20,
+            }
+        });
+    </script>
+</body>
+</html>

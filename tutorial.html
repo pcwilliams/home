@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building HomeNet with Claude Code - A Tutorial</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-alt: #1c2333;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent-cyan: #00d2d3;
+            --accent-orange: #ff9f43;
+            --accent-blue: #54a0ff;
+            --accent-green: #00b894;
+            --accent-purple: #a29bfe;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--accent-cyan);
+            margin: 48px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            background: var(--accent-cyan);
+            color: var(--bg);
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .step-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .intro {
+            font-size: 1.05rem;
+            margin-bottom: 32px;
+            color: var(--text);
+        }
+
+        .toc {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px 32px;
+            margin: 32px 0;
+        }
+
+        .toc h3 { margin-top: 0; color: var(--accent-orange); }
+        .toc ol { margin-bottom: 0; padding-left: 20px; }
+        .toc li { margin: 6px 0; }
+        .toc a { color: var(--accent-cyan); text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+
+        .prompt {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-orange);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .prompt::before {
+            content: 'YOU';
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--accent-orange);
+            color: var(--bg);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+
+        .response {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .response::before {
+            content: 'CLAUDE';
+            position: absolute;
+            top: -10px;
+            left: 16px;
+            background: var(--accent-cyan);
+            color: var(--bg);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 4px;
+        }
+
+        .tip {
+            background: rgba(0, 184, 148, 0.1);
+            border: 1px solid rgba(0, 184, 148, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .tip::before {
+            content: 'TIP';
+            display: inline-block;
+            background: var(--accent-green);
+            color: var(--bg);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .insight {
+            background: rgba(162, 155, 254, 0.1);
+            border: 1px solid rgba(162, 155, 254, 0.3);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+        }
+
+        .insight::before {
+            content: 'KEY INSIGHT';
+            display: inline-block;
+            background: var(--accent-purple);
+            color: var(--bg);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: rgba(0, 210, 211, 0.1);
+            color: var(--accent-cyan);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 48px 0;
+        }
+
+        ul, ol { padding-left: 24px; margin: 8px 0; }
+        li { margin: 4px 0; }
+
+        .files-created {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .file-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+        }
+
+        .footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Building HomeNet</h1>
+        <p class="subtitle">A visual home network scanner, built entirely through conversation with Claude Code</p>
+
+        <p class="intro">
+            HomeNet discovers and visualises every device on your Wi-Fi network. It combines Bonjour/mDNS service discovery
+            with TCP port scanning to find everything from iPhones and smart speakers to printers and NAS boxes, then presents
+            them on an interactive radial map. This is the story of how it was built.
+        </p>
+
+        <!-- Hero screenshot -->
+        <div style="text-align: center; margin: 32px 0 40px;">
+            <div style="display: inline-block; background: #000; border-radius: 40px; padding: 14px; box-shadow: 0 16px 64px rgba(0,0,0,0.6);">
+                <img src="home-screenshot.png" alt="HomeNet running on iPhone 16 Pro" style="width: 260px; border-radius: 28px; display: block;" />
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 16px;">The finished app running on iPhone 16 Pro &mdash; built entirely through conversation</p>
+        </div>
+
+        <div class="toc">
+            <h3>Contents</h3>
+            <ol>
+                <li><a href="#step1">The initial idea &mdash; a visual network scanner</a></li>
+                <li><a href="#step2">Fixing the scan &mdash; finding more than just yourself</a></li>
+                <li><a href="#step3">Progressive updates &mdash; seeing devices appear in real time</a></li>
+                <li><a href="#step4">Making the map interactive &mdash; zoom, pan, and polish</a></li>
+                <li><a href="#step5">Adding tests &mdash; verifying the classification pipeline</a></li>
+                <li><a href="#step6">Stable elliptical layout &mdash; keeping devices well-spaced</a></li>
+                <li><a href="#step7">Deep device probing &mdash; HTTP, SSH, UPnP discovery</a></li>
+                <li><a href="#step8">Bonjour TXT records &amp; extended probing</a></li>
+                <li><a href="#step9">Fixing Bonjour &amp; display names</a></li>
+                <li><a href="#step10">The Frankenstein device &mdash; dedup gone wrong</a></li>
+                <li><a href="#step11">Code cleanup &amp; refactoring</a></li>
+            </ol>
+        </div>
+
+        <hr>
+
+        <h2 id="step1"><span class="step-num">1</span> The Initial Idea</h2>
+        <p class="step-subtitle">Building a complete network scanner app from scratch</p>
+
+        <div class="prompt">
+            <p>Time for a new project. I'd love an app that shows me my home network visually, finding out as much as possible
+            about each device it scans for. You should find computers, phones, smart speakers, media boxes, kitchen appliances etc.
+            Use your imagination! Make it a fun project for you.</p>
+        </div>
+
+        <div class="response">
+            <p>Created the entire app in one pass: 10 Swift source files, an Xcode project using file-system sync,
+            and programmatically generated app icons. The architecture combined two discovery strategies:</p>
+            <ul>
+                <li><strong>Bonjour/mDNS</strong> &mdash; <code>NWBrowser</code> scanning 24 service types (AirPlay, HomeKit, Chromecast, Sonos, etc.)</li>
+                <li><strong>TCP port scanning</strong> &mdash; <code>NWConnection</code> probing the entire /24 subnet on common ports</li>
+            </ul>
+            <p>A <code>DeviceClassifier</code> identifies each device using a priority chain: Bonjour services &gt; hostname patterns &gt;
+            open port fingerprints, mapping to 10 categories with distinct SF Symbol icons and colours.</p>
+        </div>
+
+        <div class="files-created">
+            <div class="file-item">HomeNetApp.swift</div>
+            <div class="file-item">ContentView.swift</div>
+            <div class="file-item">NetworkDevice.swift</div>
+            <div class="file-item">NetworkScanner.swift</div>
+            <div class="file-item">BonjourBrowser.swift</div>
+            <div class="file-item">DeviceClassifier.swift</div>
+            <div class="file-item">NetworkViewModel.swift</div>
+            <div class="file-item">NetworkMapView.swift</div>
+            <div class="file-item">DeviceListView.swift</div>
+            <div class="file-item">DeviceDetailView.swift</div>
+        </div>
+
+        <div class="insight">
+            <p>iOS doesn't allow raw socket access for ARP scanning, so the app uses <code>NWConnection</code> TCP probes
+            as a portable alternative. Combined with Bonjour (which finds most Apple and smart home devices natively),
+            this covers the vast majority of home network devices.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step2"><span class="step-num">2</span> Fixing the Scan</h2>
+        <p class="step-subtitle">Diagnosing why only one device was being found</p>
+
+        <p>On first deploy to a real iPhone, the app only found the phone itself. Time to investigate.</p>
+
+        <div class="prompt">
+            <p>I'm only seeing my phone in the scan results. Could we figure out what's going wrong with the discovery?</p>
+        </div>
+
+        <div class="response">
+            <p>Found five bugs in the scanning pipeline:</p>
+            <ol>
+                <li><strong>Bonjour race condition</strong> &mdash; Results were collected via <code>Task { @MainActor }</code> but the timer
+                fired on <code>DispatchQueue.main</code>, so results hadn't flushed yet</li>
+                <li><strong>Callback race</strong> &mdash; <code>onDeviceFound</code> queued MainActor tasks that hadn't executed
+                when identification started</li>
+                <li><strong>Connection flood</strong> &mdash; 254 IPs &times; 12 ports = ~3,000 simultaneous <code>NWConnection</code>s overwhelmed iOS</li>
+                <li><strong><code>var resumed</code> data race</strong> &mdash; The continuation guard flag was read/written from
+                multiple queues without synchronisation</li>
+                <li><strong><code>.waiting</code> state ignored</strong> &mdash; Connections entering <code>.waiting</code> hung until timeout
+                instead of being treated as unreachable</li>
+            </ol>
+            <p>Fixes: replaced the Bonjour timer with <code>Task.sleep</code>, made <code>scanSubnet</code> return results directly via
+            an actor-isolated collection, batched port probes to 25 at a time, and introduced <code>ContinuationGate</code> with
+            <code>NSLock</code> for safe single-resume.</p>
+        </div>
+
+        <div class="tip">
+            <p>When using <code>withCheckedContinuation</code> with <code>NWConnection</code>, always guard against
+            double-resume. The <code>stateUpdateHandler</code> can fire multiple state transitions, and a timeout
+            <code>DispatchWorkItem</code> adds another resume path. A simple lock-guarded boolean prevents crashes.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step3"><span class="step-num">3</span> Progressive Updates</h2>
+        <p class="step-subtitle">Making devices update live as they're identified</p>
+
+        <div class="prompt">
+            <p>I'm noticing that devices don't update on screen as they're discovered. I have to switch between map and list
+            to see the icons and names appear. Could we make all that update dynamically?</p>
+        </div>
+
+        <div class="response">
+            <p>Found the root cause: <code>NetworkDevice</code> had a custom <code>Equatable</code> that only compared
+            <code>ipAddress</code>. When hostname, category, or services changed, SwiftUI thought the struct was
+            identical and skipped re-rendering.</p>
+            <p>Fixed by expanding equality to compare all visible properties. Also restructured the scan pipeline to
+            classify each device immediately after its hostname and ports are resolved, rather than deferring all
+            classification to the end.</p>
+        </div>
+
+        <div class="insight">
+            <p>With <code>@Published</code> arrays of value types, SwiftUI uses <code>Equatable</code> to diff elements.
+            A custom <code>==</code> that ignores mutable display properties will silently suppress UI updates. Always
+            include every property that affects rendering in your equality check.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step4"><span class="step-num">4</span> Interactive Map</h2>
+        <p class="step-subtitle">Adding zoom, pan, and visual polish</p>
+
+        <div class="prompt">
+            <p>Would it be possible to make the map pinchable and zoomable? The connecting lines are also hard to see
+            in dark mode &mdash; could we try solid lines? And the labels are overlapping nearby icons, so a bit more
+            spacing would be great.</p>
+        </div>
+
+        <div class="response">
+            <p>Rewrote the map layout to support gestures and better spacing:</p>
+            <ul>
+                <li><strong>Pinch-to-zoom</strong> (0.5x&ndash;4x) via <code>MagnificationGesture</code></li>
+                <li><strong>Drag-to-pan</strong> with a reset button that appears when zoomed/panned</li>
+                <li><strong>Solid connection lines</strong> at 35% opacity with category-coloured tinting</li>
+                <li><strong>Even circular distribution</strong> &mdash; devices on each ring are spaced evenly around the full
+                360&deg;, with adjacent rings staggered so nodes don't align radially</li>
+                <li><strong>Label pill backgrounds</strong> &mdash; dark capsule behind each device name for contrast</li>
+            </ul>
+        </div>
+
+        <div class="tip">
+            <p>When combining <code>MagnificationGesture</code> and <code>DragGesture</code>, use
+            <code>.simultaneousGesture</code> for the drag so both can be active at once. Track
+            <code>lastScale</code>/<code>lastOffset</code> separately from current values to handle
+            gesture continuation correctly.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step5"><span class="step-num">5</span> Testing the Pipeline</h2>
+        <p class="step-subtitle">57 tests covering classification, models, and progressive updates</p>
+
+        <div class="prompt">
+            <p>How about adding some tests too? It would be great to simulate the async order things happen in and make sure
+            the classification pipeline works correctly.</p>
+        </div>
+
+        <div class="response">
+            <p>Added three test suites using Swift Testing (<code>@Test</code>, <code>#expect</code>):</p>
+            <ul>
+                <li><strong>DeviceClassifierTests</strong> (30 tests) &mdash; service-based, hostname-based, and port-based
+                classification; priority ordering; refined icon selection</li>
+                <li><strong>NetworkDeviceTests</strong> (11 tests) &mdash; display name formatting, gateway detection,
+                equality semantics, hash behaviour</li>
+                <li><strong>ProgressiveUpdateTests</strong> (16 tests) &mdash; simulates the full enrichment pipeline:
+                bare IP &rarr; hostname &rarr; ports &rarr; services &rarr; classification, verifying each stage
+                updates correctly</li>
+            </ul>
+            <p>All 57 tests pass. The progressive update tests specifically verify the <code>Equatable</code> fix &mdash;
+            that enriching a device changes its equality, which is what triggers SwiftUI to re-render.</p>
+        </div>
+
+        <div class="insight">
+            <p>Testing network scanning logic without a real network is straightforward when you extract
+            <code>DeviceClassifier.classify()</code> as a pure static method with explicit parameters. The tests
+            inject hostnames, services, and ports directly, verifying classification logic without touching
+            <code>NWBrowser</code> or <code>NWConnection</code>.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step6"><span class="step-num">6</span> Stable Elliptical Layout</h2>
+        <p class="step-subtitle">Keeping devices well-spaced as they update</p>
+
+        <div class="prompt">
+            <p>The devices start nicely spread out, but when they update and get classified, they all collapse together.
+            Could we fix that? There's also a lot more vertical room we could be using on a portrait screen.</p>
+        </div>
+
+        <div class="response">
+            <p>Rewrote <code>computePositions</code> with two key changes:</p>
+            <ul>
+                <li><strong>Elliptical layout</strong> &mdash; independent X and Y radii from <code>GeometryReader</code>,
+                using <code>geo.size.width * 0.42</code> and <code>geo.size.height * 0.42</code> to fill the
+                portrait screen vertically</li>
+                <li><strong>Stable angular positioning</strong> &mdash; all non-router devices distributed evenly by
+                array index around the full ellipse (<code>2&pi;/count</code>), with only subtle radius variation
+                by category (0.70&ndash;1.0). When a device gets classified, its angle stays the same &mdash;
+                only the radius shifts slightly inward</li>
+            </ul>
+            <p>The previous ring-based layout had devices jumping from an outer ring (0.95) to a much smaller inner
+            ring (0.35) when classified, dramatically shrinking the available circumference and causing visual collapse.</p>
+        </div>
+
+        <div class="insight">
+            <p>When building progressive-update UIs, position stability matters as much as visual design.
+            If a layout algorithm depends on data that changes over time (like device category), positions will
+            jump unpredictably. The fix is to base positions on stable properties (array index) and let only
+            secondary visual properties (radius) respond to data changes.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step7"><span class="step-num">7</span> Deep Device Probing</h2>
+        <p class="step-subtitle">HTTP headers, SSH banners, and UPnP discovery</p>
+
+        <div class="prompt">
+            <p>I said have fun with this! Could we go further? When you find a device, how about poking at it
+            on standard ports and protocols &mdash; HTTP on 80 and 443, maybe other protocols &mdash; to see if
+            any more info can be gleaned?</p>
+        </div>
+
+        <div class="response">
+            <p>Created a <code>DeviceProber</code> actor that interrogates each discovered device after the initial scan:</p>
+            <ul>
+                <li><strong>HTTP/HTTPS probing</strong> (ports 80, 443, 8080, 8443) &mdash; extracts Server header,
+                page title, X-Powered-By, meta generator, and auth realm</li>
+                <li><strong>SSH banner grabbing</strong> (port 22) &mdash; reads the version string the server sends
+                on connect (e.g. <code>SSH-2.0-OpenSSH_8.9p1 Ubuntu</code>)</li>
+                <li><strong>FTP/SMTP/RTSP banners</strong> (ports 21, 25, 554) &mdash; captures welcome messages</li>
+                <li><strong>UPnP device descriptions</strong> &mdash; fetches XML from standard paths to extract
+                manufacturer, model, serial number, firmware version, and friendly name</li>
+            </ul>
+            <p>Probe results are stored as <code>[ProbeEntry]</code> on each device, displayed in a
+            &ldquo;Discovered Info&rdquo; section in the detail view, and fed into the classifier for reclassification.</p>
+        </div>
+
+        <div class="prompt">
+            <p>I'm only getting 4 devices now &mdash; the extra probing work is probably making the scan time out.
+            Could we make all the new work asynchronous, so the diagram can update before probing comes back?</p>
+        </div>
+
+        <div class="response">
+            <p>Split the pipeline into two phases:</p>
+            <ul>
+                <li><strong>Phase 1 (scan)</strong> &mdash; Bonjour + subnet scan + identification, exactly as before.
+                Completes and shows all devices on the map immediately</li>
+                <li><strong>Phase 2 (probe)</strong> &mdash; fires off as a separate <code>Task</code> after the scan
+                declares completion. Each batch of 4 devices is probed in parallel, with results updating the UI
+                progressively as they arrive</li>
+            </ul>
+            <p>The map now shows a small orange spinner during probing, and device labels, categories, and detail views
+            update in real time as probe data arrives &mdash; without blocking the initial scan results.</p>
+        </div>
+
+        <div class="insight">
+            <p>When adding a slow enrichment step to a progressive-update pipeline, always run it as an independent
+            <code>Task</code> rather than tacking it onto the end of the scan. The user sees the map immediately with
+            basic info, and then each device &ldquo;fills in&rdquo; with manufacturer names, model numbers, and
+            reclassified categories as the probes complete. This pattern &mdash; fast coarse results first, slow rich
+            results layered on top &mdash; works well for any multi-phase discovery system.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step8"><span class="step-num">8</span> Bonjour TXT Records &amp; Extended Probing</h2>
+        <p class="step-subtitle">AirPlay info, Chromecast details, latency measurement, Apple model IDs</p>
+
+        <div class="prompt">
+            <p>Can you think of any other interrogation we could do? Maybe for certain recognised devices like
+            iPhones, Apple TVs, media devices? Also do we get hop counts? Can I see if any of these devices are
+            traversing WiFi or wired networks? Really anything you can think of that would be interesting to a
+            technically-minded user!</p>
+        </div>
+
+        <div class="response">
+            <p>Added several new interrogation layers:</p>
+            <ul>
+                <li><strong>Bonjour TXT records</strong> &mdash; Extract <code>model</code>, <code>am</code>,
+                <code>osvers</code>, <code>deviceid</code>, and more from mDNS metadata. Apple model identifiers
+                like <code>MacBookPro18,1</code> or <code>AppleTV6,2</code> enable precise classification before
+                any probing starts</li>
+                <li><strong>AirPlay <code>/info</code></strong> &mdash; Fetches binary/XML plist from port 7000
+                containing model identifier, firmware version, MAC address, and AirPlay version</li>
+                <li><strong>Chromecast <code>/setup/eureka_info</code></strong> &mdash; JSON endpoint on port 8008
+                revealing device name, model, manufacturer, firmware, WiFi SSID, signal strength, noise level,
+                and ethernet connection status</li>
+                <li><strong>TCP latency measurement</strong> &mdash; Uses <code>ContinuousClock</code> to time
+                TCP connections as a proxy for connection type: &lt;5ms suggests wired, 5&ndash;30ms WiFi,
+                &gt;50ms multi-hop or remote</li>
+                <li><strong>Apple model ID lookup table</strong> &mdash; Maps identifiers to friendly names
+                (e.g. &ldquo;Apple TV 4K (1st gen)&rdquo;)</li>
+                <li><strong>TXT records in detail view</strong> &mdash; Each Bonjour service now shows its
+                TXT record key-value pairs inline</li>
+            </ul>
+            <p>The classifier now checks TXT record model IDs first &mdash; before even looking at service types &mdash;
+            giving the most precise classification possible for Apple devices.</p>
+        </div>
+
+        <div class="insight">
+            <p>Bonjour TXT records are an underused goldmine. Most Apple devices broadcast their hardware model
+            identifier, OS version, and device ID via mDNS &mdash; you just have to know which keys to probe.
+            Using <code>NWBrowser.Result.metadata</code> with <code>getEntry(for:)</code> is cleaner than
+            trying to iterate the entire TXT record. The model-first classification means a HomePod is correctly
+            identified as a speaker even before its hostname is resolved.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step9"><span class="step-num">9</span> Fixing Bonjour &amp; Display Names</h2>
+        <p class="step-subtitle">Diagnosing why the map showed IP addresses instead of friendly names</p>
+
+        <div class="prompt">
+            <p>We were diagnosing why IP addresses don't get replaced by Bonjour names on the map pane.
+            We just ran with a lot of logging enabled&hellip;</p>
+        </div>
+
+        <div class="response">
+            <p>The logs revealed two distinct problems:</p>
+            <ol>
+                <li><strong>Bonjour completely broken</strong> &mdash; all 24 <code>NWBrowser</code> instances failed with
+                <code>DNSServiceBrowse failed: NoAuth (-65555)</code>. The Info.plist was missing
+                <code>NSBonjourServices</code> (the array of service types) and <code>NSLocalNetworkUsageDescription</code>
+                (the permission prompt string). Without these, iOS blocks all mDNS browsing silently</li>
+                <li><strong>Probe names ignored</strong> &mdash; the <code>displayName</code> property only checked for
+                UPnP friendly names (<code>source == "UPnP"</code>), missing AirPlay and Chromecast probe results that
+                also return device names. A Mac Studio discovered via AirPlay <code>/info</code> as
+                &ldquo;MacStudioServer&rdquo; was still showing its raw IP on the map</li>
+            </ol>
+            <p>Fixes: added all 24 Bonjour service types to Info.plist, broadened <code>displayName</code> to use
+            any probe result with <code>label == "Name"</code>, updated the status bar to show &ldquo;identified&rdquo;
+            count (hostname, services, or probes) instead of just &ldquo;probed&rdquo;, and made diagnostic logging
+            opt-in via a <code>verbose</code> flag.</p>
+            <p>With Bonjour working, a new problem emerged: the same device appeared as two or three map nodes.
+            RAOP (AirPlay Audio) service names include a hex MAC prefix (<code>D0817AD9AF37@Paul's iMac Pro</code>)
+            that prevented matching. And when mDNS resolution failed, unmatched Bonjour entries created phantom
+            devices with fake <code>bonjour-</code> IP addresses.</p>
+            <p>The fix: <code>stripBonjourHexPrefix()</code> normalises RAOP names throughout the pipeline, services
+            are merged (not replaced) when multiple Bonjour names match the same device, unresolvable Bonjour entries
+            are dropped instead of creating phantoms, and a final <code>deduplicateByIP()</code> pass merges any
+            remaining duplicates by combining their services, ports, and probe results.</p>
+        </div>
+
+        <div class="insight">
+            <p>iOS Bonjour permissions are a two-part requirement that fails silently. You need both
+            <code>NSLocalNetworkUsageDescription</code> (for the user-facing permission prompt) <em>and</em>
+            <code>NSBonjourServices</code> (declaring every service type you browse) in Info.plist. Missing either
+            one causes <code>NWBrowser</code> to fail with a cryptic <code>NoAuth</code> error &mdash; no crash,
+            no permission dialog, just zero results. Always check the system log for <code>-65555</code> if
+            Bonjour returns empty.</p>
+            <p>When merging discovery sources, use the device&rsquo;s real IP address as the deduplication key &mdash;
+            it&rsquo;s the one stable identifier across Bonjour browsing, port scanning, and hostname resolution.
+            Bonjour service names vary by protocol (RAOP adds a hex prefix, mDNS uses the user-set name, etc.),
+            so name matching alone will always miss some duplicates.</p>
+        </div>
+
+        <hr>
+
+        <h2 id="step10"><span class="step-num">10</span> The Frankenstein Device</h2>
+        <p class="step-subtitle">When deduplication goes horribly wrong</p>
+
+        <div class="prompt">
+            <p>I'm still seeing duplicate Mac Studios on the map. Could we add deduplication by IP address
+            after all the matching?</p>
+        </div>
+
+        <div class="response">
+            <p>Added a <code>deduplicateByIP()</code> pass that merged devices sharing the same IP address,
+            combining their services, ports, and probe results. It worked perfectly &mdash; except for one
+            catastrophic edge case.</p>
+            <p>Bonjour-only devices that couldn&rsquo;t be resolved to a real IP were being created with a
+            placeholder IP of <code>"unknown"</code>. Ten completely unrelated devices &mdash; Paul&rsquo;s
+            iMac Pro, two Sky Q boxes, two MacStudioM1 instances, an Aries Kitchen speaker, an Auralic streamer,
+            and two Apple TVs &mdash; all ended up with <code>ip=unknown</code>. The dedup logic then gleefully
+            merged them all into a single Frankenstein device with 9 services from 10 different physical devices.</p>
+            <p>The fix was simple: skip <code>"unknown"</code> IPs during deduplication. But the deeper issue was
+            that name matching was failing for most devices because:</p>
+            <ul>
+                <li><strong><code>.lan</code> suffix ignored</strong> &mdash; hostnames like <code>macstudiom1-7.lan</code>
+                weren&rsquo;t having <code>.lan</code> stripped, only <code>.local</code></li>
+                <li><strong>DNS disambiguation numbers</strong> &mdash; routers append <code>-7</code> to hostnames
+                when multiple devices share a name, but Bonjour uses instance numbers like <code>(920)</code></li>
+                <li><strong>Parenthesised suffixes</strong> &mdash; <code>MacStudioM1 (920)</code> didn&rsquo;t match
+                <code>macstudiom1-7</code> because neither &ldquo;contained&rdquo; the other after normalisation</li>
+            </ul>
+            <p>The solution was a proper <code>normaliseName()</code> function that strips domain suffixes
+            (<code>.lan</code>, <code>.local</code>, <code>.home.arpa</code>), parenthesised instance numbers,
+            DNS disambiguation suffixes, hex RAOP prefixes, apostrophes, and dashes &mdash; reducing both
+            <code>macstudiom1-7.lan</code> and <code>MacStudioM1 (920)</code> to the same canonical form:
+            <code>macstudiom1</code>.</p>
+        </div>
+
+        <div class="insight">
+            <p>Deduplication on a placeholder value is a landmine. If multiple unrelated items share a
+            default/sentinel value (like <code>"unknown"</code> or <code>""</code>), any dedup logic that
+            keys on that field will silently merge them into one. Always exclude sentinel values from
+            dedup keys. And when matching names across different naming systems (DNS hostnames vs Bonjour
+            service names vs mDNS names), normalise aggressively &mdash; every system adds its own suffixes,
+            prefixes, and disambiguation patterns that prevent naive string comparison from working.</p>
+        </div>
+
+        <h2 id="step11"><span class="step-num">11</span> Code Cleanup &amp; Refactoring</h2>
+
+        <div class="prompt-block">
+            <div class="prompt-label">Prompt</div>
+            <p>&ldquo;Since we've had quite a few iterations, I wonder if it would be worth going through the code
+            and cleaning up any inefficiencies, refactoring where necessary to prevent code duplication,
+            and commenting everything well. Could we also make sure the test coverage is comprehensive?&rdquo;</p>
+        </div>
+
+        <div class="response-block">
+            <div class="response-label">What Changed</div>
+            <p>A comprehensive audit identified six categories of cleanup across all source files:</p>
+            <ul>
+                <li><strong>Eliminated 5 duplicate colour switches</strong> &mdash; replaced <code>categoryColor()</code>
+                and <code>nodeColor</code> computed properties in NetworkMapView, DeviceNode, DeviceListView,
+                DeviceRow, and DeviceDetailView with a single <code>DeviceCategory.swiftUIColor</code> property</li>
+                <li><strong>Consolidated ContinuationGate</strong> &mdash; NetworkScanner and DeviceProber each had
+                their own identical <code>ContinuationGate</code> / <code>ProberContinuationGate</code> class;
+                merged into one shared <code>ContinuationGate</code></li>
+                <li><strong>Extracted <code>cleanHostname()</code></strong> &mdash; domain suffix stripping
+                (<code>.local</code>, <code>.lan</code>, <code>.home.arpa</code>) was done inline in 4 places
+                with inconsistent coverage; now a single shared function used by <code>displayName</code> and
+                the ViewModel&rsquo;s name matching</li>
+                <li><strong>Removed dead code</strong> &mdash; <code>FoundIPs</code> actor (unused since streaming
+                refactor), <code>X-Frame-Options</code> header block (read but never used), unused <code>label</code>
+                field from <code>BonjourBrowser.serviceTypes</code></li>
+                <li><strong>Used <code>mergeServices()</code> inside <code>deduplicateByIP()</code></strong> &mdash;
+                replaced inline service dedup with the existing helper method</li>
+                <li><strong>Fixed <code>displayName</code></strong> &mdash; hostname fallback now strips
+                <code>.lan</code> and <code>.home.arpa</code> suffixes, not just <code>.local</code></li>
+            </ul>
+            <p>Tests grew from 114 to 119 with new <code>cleanHostname()</code> coverage and updated assertions
+            for the improved hostname stripping.</p>
+        </div>
+
+        <div class="lesson-block">
+            <div class="lesson-label">Lesson</div>
+            <p>After several rapid feature iterations, technical debt accumulates in small ways &mdash; a colour
+            switch duplicated across five views, a helper function that should exist but doesn&rsquo;t, inline
+            logic that diverges from the canonical version. A systematic audit pass catches these before they
+            become maintenance headaches. The key is to search for patterns across the whole codebase, not just
+            the file you&rsquo;re editing.</p>
+        </div>
+
+        <div class="footer">
+            <p>HomeNet &mdash; Built with Claude Code &mdash; March 2026</p>
+        </div>
+    </div>
+</body>
+</html>
