@@ -49,6 +49,16 @@ A visual home network scanner for iPhone. Discovers devices on your Wi-Fi using 
 
 **Note:** This app must be tested on a physical iPhone — the simulator doesn't have access to a real local network.
 
+For day-to-day rebuilds onto a paired iPhone, use the bundled helper —
+it builds (signed), installs, and launches in one step:
+
+```bash
+./run_phone.sh
+```
+
+`run_phone.sh` reads `APPLE_TEAM_ID`, `IPHONE_UDID`, and `IPHONE_BUILD_ID`
+from `~/appledev/setupenv.sh` to handle code-signing automatically.
+
 ## Build from Command Line
 
 ```bash
